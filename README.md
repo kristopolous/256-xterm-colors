@@ -1,3 +1,7 @@
+# THIS IS BROKEN
+
+It's a ruby rewrite of the project forked.  I'm doing it for my own use. Be forwarned.
+
 # color-convert
 Color-convert is a color conversion library for JavaScript and node. It converts all ways between rgb, hsl, hsv, cmyk, and CSS keywords:
 

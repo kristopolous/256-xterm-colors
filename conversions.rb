@@ -1,50 +1,11 @@
-/* MIT license */
-
-module.exports = {
-  rgb2hsl: rgb2hsl,
-  rgb2hsv: rgb2hsv,
-  rgb2cmyk: rgb2cmyk,
-  rgb2keyword: rgb2keyword,
-  rgb2xyz: rgb2xyz,
-  rgb2lab: rgb2lab,
-
-  hsl2rgb: hsl2rgb,
-  hsl2hsv: hsl2hsv,
-  hsl2cmyk: hsl2cmyk,
-  hsl2keyword: hsl2keyword,
-
-  hsv2rgb: hsv2rgb,
-  hsv2hsl: hsv2hsl,
-  hsv2cmyk: hsv2cmyk,
-  hsv2keyword: hsv2keyword,
-
-  cmyk2rgb: cmyk2rgb,
-  cmyk2hsl: cmyk2hsl,
-  cmyk2hsv: cmyk2hsv,
-  cmyk2keyword: cmyk2keyword,
-  
-  keyword2rgb: keyword2rgb,
-  keyword2hsl: keyword2hsl,
-  keyword2hsv: keyword2hsv,
-  keyword2cmyk: keyword2cmyk,
-  keyword2lab: keyword2lab,
-  keyword2xyz: keyword2xyz,
-  
-  xyz2rgb: xyz2rgb,
-  xyz2lab: xyz2lab,
-  
-  lab2xyz: lab2xyz,
-}
-
-
-function rgb2hsl(rgb) {
-  var r = rgb[0]/255,
-      g = rgb[1]/255,
-      b = rgb[2]/255,
-      min = Math.min(r, g, b),
-      max = Math.max(r, g, b),
-      delta = max - min,
-      h, s, l;
+module Convert 
+def rgb2hsl(rgb) 
+  r = rgb[0]/255
+  g = rgb[1]/255
+  b = rgb[2]/255
+  min = [r, g, b].min
+  max = [r, g, b].max
+  delta = max - min
 
   if (max == min)
     h = 0;
@@ -55,10 +16,10 @@ function rgb2hsl(rgb) {
   else if (b == max)
     h = 4 + (r - g)/ delta;
 
-  h = Math.min(h * 60, 360);
+  h = [h * 60, 360].min
 
   if (h < 0)
-    h += 360;
+    h += 360
 
   l = (min + max) / 2;
 
@@ -69,10 +30,10 @@ function rgb2hsl(rgb) {
   else
     s = delta / (2 - max - min);
 
-  return [h, s * 100, l * 100];
-}
+  [h, s * 100, l * 100]
+end
 
-function rgb2hsv(rgb) {
+def rgb2hsv(rgb) {
   var r = rgb[0],
       g = rgb[1],
       b = rgb[2],
@@ -95,39 +56,38 @@ function rgb2hsv(rgb) {
   else if (b == max)
     h = 4 + (r - g) / delta;
 
-  h = Math.min(h * 60, 360);
+  h = [h * 60, 360].min
 
   if (h < 0) 
     h += 360;
 
   v = ((max / 255) * 1000) / 10;
 
-  return [h, s, v];
-}
+  [h, s, v]
+end
 
-function rgb2cmyk(rgb) {
-  var r = rgb[0] / 255,
-      g = rgb[1] / 255,
-      b = rgb[2] / 255,
-      c, m, y, k;
+def rgb2cmyk(rgb)
+  r = rgb[0] / 255
+  g = rgb[1] / 255
+  b = rgb[2] / 255
       
-  k = Math.min(1 - r, 1 - g, 1 - b);
-  c = (1 - r - k) / (1 - k);
-  m = (1 - g - k) / (1 - k);
-  y = (1 - b - k) / (1 - k);
-  return [c * 100, m * 100, y * 100, k * 100];
+  k = [1 - r, 1 - g, 1 - b].min
+  c = (1 - r - k) / (1 - k)
+  m = (1 - g - k) / (1 - k)
+  y = (1 - b - k) / (1 - k)
+  [c * 100, m * 100, y * 100, k * 100]
 }
 
-function rgb2keyword(rgb) {
-  return reverseKeywords[JSON.stringify(rgb)];
-}
+def rgb2keyword(rgb) 
+  reverseKeywords[JSON.stringify(rgb)];
+end
 
-function rgb2xyz(rgb) {
-  var r = rgb[0] / 255,
-      g = rgb[1] / 255,
-      b = rgb[2] / 255;
+def rgb2xyz(rgb) 
+  r = rgb[0] / 255
+  g = rgb[1] / 255
+  b = rgb[2] / 255
 
-  // assume sRGB
+  # assume sRGB
   r = r > 0.04045 ? Math.pow(((r + 0.055) / 1.055), 2.4) : (r / 12.92);
   g = g > 0.04045 ? Math.pow(((g + 0.055) / 1.055), 2.4) : (g / 12.92);
   b = b > 0.04045 ? Math.pow(((b + 0.055) / 1.055), 2.4) : (b / 12.92);
@@ -136,15 +96,14 @@ function rgb2xyz(rgb) {
   var y = (r * 0.2126) + (g * 0.7152) + (b * 0.0722);
   var z = (r * 0.0193) + (g * 0.1192) + (b * 0.9505);
 
-  return [x * 100, y *100, z * 100];
-}
+  [x * 100, y *100, z * 100]
+end
 
-function rgb2lab(rgb) {
-  var xyz = rgb2xyz(rgb),
-        x = xyz[0],
-        y = xyz[1],
-        z = xyz[2],
-        l, a, b;
+def rgb2lab(rgb) 
+  xyz = rgb2xyz(rgb)
+  x = xyz[0]
+  y = xyz[1]
+  z = xyz[2]
 
   x /= 95.047;
   y /= 100;
@@ -158,15 +117,13 @@ function rgb2lab(rgb) {
   a = 500 * (x - y);
   b = 200 * (y - z);
   
-  return [l, a, b];
-}
+  [l, a, b]
+end
 
-
-function hsl2rgb(hsl) {
-  var h = hsl[0] / 360,
-      s = hsl[1] / 100,
-      l = hsl[2] / 100,
-      t1, t2, t3, rgb, val;
+def hsl2rgb(hsl)
+  h = hsl[0] / 360
+  s = hsl[1] / 100
+  l = hsl[2] / 100
 
   if (s == 0) {
     val = l * 255;
@@ -197,116 +154,112 @@ function hsl2rgb(hsl) {
     rgb[i] = val * 255;
   }
   
-  return rgb;
-}
+  rgb
+end
 
-function hsl2hsv(hsl) {
-  var h = hsl[0],
-      s = hsl[1] / 100,
-      l = hsl[2] / 100,
-      sv, v;
+def hsl2hsv(hsl)
+  h = hsl[0]
+  s = hsl[1] / 100
+  l = hsl[2] / 100
+
   l *= 2;
-  s *= (l <= 1) ? l : 2 - l;
-  v = (l + s) / 2;
-  sv = (2 * s) / (l + s);
-  return [h, sv * 100, v * 100];
-}
+  s *= (l <= 1) ? l : 2 - l
+  v = (l + s) / 2
+  sv = (2 * s) / (l + s)
+  [h, sv * 100, v * 100]
+end
 
-function hsl2cmyk(args) {
-  return rgb2cmyk(hsl2rgb(args));
-}
+def hsl2cmyk(args)
+  rgb2cmyk(hsl2rgb(args));
+end
 
-function hsl2keyword(args) {
-  return rgb2keyword(hsl2rgb(args));
-}
+def hsl2keyword(args)
+  rgb2keyword(hsl2rgb(args))
+end
 
+def hsv2rgb(hsv)
+  h = hsv[0] / 60
+  s = hsv[1] / 100
+  v = hsv[2] / 100
+  hi = h.floor % 6
 
-function hsv2rgb(hsv) {
-  var h = hsv[0] / 60,
-      s = hsv[1] / 100,
-      v = hsv[2] / 100,
-      hi = Math.floor(h) % 6;
+  f = h - h.floor
+  p = 255 * v * (1 - s)
+  q = 255 * v * (1 - (s * f))
+  t = 255 * v * (1 - (s * (1 - f)))
+  v = 255 * v
 
-  var f = h - Math.floor(h),
-      p = 255 * v * (1 - s),
-      q = 255 * v * (1 - (s * f)),
-      t = 255 * v * (1 - (s * (1 - f))),
-      v = 255 * v;
+  case hi
+    when 0:
+      return [v, t, p]
+    when 1:
+      return [q, v, p]
+    when 2:
+      return [p, v, t]
+    when 3:
+      return [p, q, v]
+    when 4:
+      return [t, p, v]
+    when 5:
+      return [v, p, q]
+  end 
+end
 
-  switch(hi) {
-    case 0:
-      return [v, t, p];
-    case 1:
-      return [q, v, p];
-    case 2:
-      return [p, v, t];
-    case 3:
-      return [p, q, v];
-    case 4:
-      return [t, p, v];
-    case 5:
-      return [v, p, q];
-  }
-}
-
-function hsv2hsl(hsv) {
-  var h = hsv[0],
-      s = hsv[1] / 100,
-      v = hsv[2] / 100,
-      sl, l;
+def hsv2hsl(hsv)
+  h = hsv[0]
+  s = hsv[1] / 100
+  v = hsv[2] / 100
 
   l = (2 - s) * v;  
   sl = s * v;
   sl /= (l <= 1) ? l : 2 - l;
   l /= 2;
-  return [h, sl * 100, l * 100];
-}
+  [h, sl * 100, l * 100]
+end
 
-function hsv2cmyk(args) {
-  return rgb2cmyk(hsv2rgb(args));
-}
+def hsv2cmyk(args)
+  rgb2cmyk(hsv2rgb(args));
+end
 
-function hsv2keyword(args) {
-  return rgb2keyword(hsv2rgb(args));
-}
+def hsv2keyword(args)
+  rgb2keyword(hsv2rgb(args));
+end
 
-function cmyk2rgb(cmyk) {
-  var c = cmyk[0] / 100,
-      m = cmyk[1] / 100,
-      y = cmyk[2] / 100,
-      k = cmyk[3] / 100,
-      r, g, b;
+def cmyk2rgb(cmyk)
+  c = cmyk[0] / 100
+  m = cmyk[1] / 100
+  y = cmyk[2] / 100
+  k = cmyk[3] / 100
 
-  r = 1 - Math.min(1, c * (1 - k) + k);
-  g = 1 - Math.min(1, m * (1 - k) + k);
+  r = 1 - [1, c * (1 - k) + k].min
+  g = 1 - [1, m * (1 - k) + k].min
   b = 1 - Math.min(1, y * (1 - k) + k);
-  return [r * 255, g * 255, b * 255];
-}
+  [r * 255, g * 255, b * 255]
+end
 
-function cmyk2hsl(args) {
-  return rgb2hsl(cmyk2rgb(args));
-}
+def cmyk2hsl(args)
+  rgb2hsl(cmyk2rgb(args));
+end
 
-function cmyk2hsv(args) {
-  return rgb2hsv(cmyk2rgb(args));
-}
+def cmyk2hsv(args) 
+  rgb2hsv(cmyk2rgb(args));
+end
 
-function cmyk2keyword(args) {
-  return rgb2keyword(cmyk2rgb(args));
-}
+def cmyk2keyword(args)
+  rgb2keyword(cmyk2rgb(args));
+end
 
 
-function xyz2rgb(xyz) {
-  var x = xyz[0] / 100,
-      y = xyz[1] / 100,
-      z = xyz[2] / 100,
-      r, g, b;
+def xyz2rgb(xyz)
+  x = xyz[0] / 100
+  y = xyz[1] / 100
+  z = xyz[2] / 100
+  r, g, b;
 
   r = (x * 3.2406) + (y * -1.5372) + (z * -0.4986);
   g = (x * -0.9689) + (y * 1.8758) + (z * 0.0415);
   b = (x * 0.0557) + (y * -0.2040) + (z * 1.0570);
 
-  // assume sRGB
   r = r > 0.0031308 ? ((1.055 * Math.pow(r, 1.0 / 2.4)) - 0.055)
     : r = (r * 12.92);
 
@@ -316,14 +269,14 @@ function xyz2rgb(xyz) {
   b = b > 0.0031308 ? ((1.055 * Math.pow(b, 1.0 / 2.4)) - 0.055)
     : b = (b * 12.92);
 
-  r = (r < 0) ? 0 : r;
-  g = (g < 0) ? 0 : g;
-  b = (b < 0) ? 0 : b;
+  r = (r < 0) ? 0 : r
+  g = (g < 0) ? 0 : g
+  b = (b < 0) ? 0 : b
 
-  return [r * 255, g * 255, b * 255];
-}
+  [r * 255, g * 255, b * 255]
+end
 
-function xyz2lab(xyz) {
+def xyz2lab(xyz) 
   var x = xyz[0],
       y = xyz[1],
       z = xyz[2],
@@ -341,10 +294,10 @@ function xyz2lab(xyz) {
   a = 500 * (x - y);
   b = 200 * (y - z);
   
-  return [l, a, b];
-}
+  [l, a, b]
+end
 
-function lab2xyz(lab) {
+def lab2xyz(lab)
   var l = lab[0],
       a = lab[1],
       b = lab[2],
@@ -362,32 +315,32 @@ function lab2xyz(lab) {
 
   z = z / 108.883 <= 0.008859 ? z = (108.883 * (y2 - (b / 200) - (16 / 116))) / 7.787 : 108.883 * Math.pow(y2 - (b / 200), 3);
 
-  return [x, y, z];
-}
+  [x, y, z]
+end
 
-function keyword2rgb(keyword) {
-  return cssKeywords[keyword];
-}
+def keyword2rgb(keyword) 
+  cssKeywords[keyword]
+end
 
-function keyword2hsl(args) {
-  return rgb2hsl(keyword2rgb(args));
-}
+def keyword2hsl(args) 
+  rgb2hsl(keyword2rgb(args))
+end
 
-function keyword2hsv(args) {
-  return rgb2hsv(keyword2rgb(args));
-}
+def keyword2hsv(args)
+  rgb2hsv(keyword2rgb(args))
+end
 
-function keyword2cmyk(args) {
-  return rgb2cmyk(keyword2rgb(args));
-}
+def keyword2cmyk(args) 
+  rgb2cmyk(keyword2rgb(args))
+end
 
-function keyword2lab(args) {
-  return rgb2lab(keyword2rgb(args));
-}
+def keyword2lab(args) 
+  rgb2lab(keyword2rgb(args))
+end
 
-function keyword2xyz(args) {
-  return rgb2xyz(keyword2rgb(args));
-}
+def keyword2xyz(args)
+  rgb2xyz(keyword2rgb(args))
+end
 
 var cssKeywords = {
   aliceblue:  [240,248,255],
