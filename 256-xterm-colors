@@ -23,12 +23,147 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-256.times do |i|
-  # Print color code in a background and foregroud color
-  print "\e[48;5;#{i}m\e[38;5;15m #{"%03d" % i} "
-  print "\e[48;5;0m\e[38;5;#{i}m #{"%03d" % i}\t"
 
-  # Print newline to seperate the color blocks
-  print "\n" if (i + 1) <= 16 ? ((i + 1) % 8 == 0)  : (((i + 1) - 16) % 6 == 0)
-  print "\n" if (i + 1) <= 16 ? ((i + 1) % 16 == 0) : (((i + 1) - 16) % 36 == 0)
+def min3(a,b,c) 
+  (a<b)?((a<c)?a:c):((b<c)?b:c)
+end
+
+def max3(a,b,c)
+  (a>b)?((a>c)?a:c):((b>c)?b:c)
+end
+
+def rgb2hsv(r, g, b) 
+
+  value = max = max3(r, g, b)
+  dif = max-min3(r, g, b).to_f
+
+  if dif == 0
+    hue = saturation = 0
+  else
+    saturation = dif / max
+
+    del_R = ( ( ( max - r ) / 6 ) + ( max / 2 ) ) / max;
+    del_G = ( ( ( max - g ) / 6 ) + ( max / 2 ) ) / max;
+    del_B = ( ( ( max - b ) / 6 ) + ( max / 2 ) ) / max;
+
+
+    if r == max
+      hue = del_B - del_G
+
+    elsif g == max 
+      hue = (1.0 / 3.0) + del_R - del_B
+
+    elsif b == max 
+      hue = (2.0 / 3.0) + del_G - del_R
+    end
+  end
+
+  if hue < 0.0 
+    hue += 1.0
+  end
+  if hue > 0.0 
+    hue -= 1.0
+  end
+
+  [hue, saturation, value]
+end
+
+def hsv2rgb(h, s, v) 
+
+  i = (h * 6).floor
+  f = h * 6.0 - i
+  p = v * (1 - s)
+  q = v * (1 - s * f)
+  t = v * (1 - s * (1 - f))
+
+  case i
+    when 0
+      return [v, t, p]
+
+    when 1
+      return [q, v, p]
+
+    when 2
+      return [p, v, t]
+
+    when 3
+      return [p, q, v]
+
+    when 4
+      return [t, p, v]
+
+    when 5
+      return [v, p, q]
+  end 
+end
+
+class Color
+  def initialize(triplet)
+    @r, @g, @b = triplet
+  end
+
+  def negate
+    h, s, v = rgb2hsv(@r, @g, @b)
+
+    v = (s + 0.5)
+    if v > 1 
+      v -= 1
+    end
+    r, g, b = hsv2rgb(h, s, v)
+
+    Color.new([r, g, b])
+  end
+
+  def decompose
+    ((@r * 216).ceil + (@g * 36).ceil + @b * 6).ceil + 16
+  end
+
+  def to_i
+    decompose
+  end
+
+  def to_s
+    decompose.to_s
+  end
+end
+
+def negate color
+end
+
+def fg color; "\e[38;5;#{color}m"; end
+def bg color; "\e[48;5;#{color}m"; end
+
+def midpoint set
+  set.map { | x | 
+    x += (1 / 6.0) / 8.0
+  }
+end
+ 
+def base6 base
+  one = (base % 6).to_f / 6
+  base /= 6
+  two = (base % 6).to_f / 6
+  base /= 6
+  three = (base % 6).to_f / 6
+  [three, two, one]
+end
+
+def docolor color
+  reset = "\e[0m"
+
+  # Print color code in a background and foregroud color
+  print "#{fg(color)}#{bg(color)}#{"%03d" % color}#{reset}"
+#  print "\e[0m\e[48;5;0m\e[38;5;#{color}m #{"%03d" % color}\n"
+end
+
+216.times do |i|
+  if i % 6 == 0
+    print "\n"
+  end
+  h, s, v = base6 i
+  r, g, b = hsv2rgb(h, s, v)
+  color = Color.new([r, g, b])
+  docolor color
+  puts "#{(h * 100).to_i} #{(s * 100).to_i} #{(v * 100).to_i} "
+  puts "   #{(r * 100).to_i} #{(g * 100).to_i} #{(b * 100).to_i} #{color}"
 end
