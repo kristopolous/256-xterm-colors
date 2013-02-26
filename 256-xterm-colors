@@ -23,58 +23,15 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-
-def min3(a,b,c) 
-  (a<b)?((a<c)?a:c):((b<c)?b:c)
-end
-
-def max3(a,b,c)
-  (a>b)?((a>c)?a:c):((b>c)?b:c)
-end
-
-def rgb2hsv(r, g, b) 
-
-  value = max = max3(r, g, b)
-  dif = max-min3(r, g, b).to_f
-
-  if dif == 0
-    hue = saturation = 0
-  else
-    saturation = dif / max
-
-    del_R = ( ( ( max - r ) / 6 ) + ( max / 2 ) ) / max;
-    del_G = ( ( ( max - g ) / 6 ) + ( max / 2 ) ) / max;
-    del_B = ( ( ( max - b ) / 6 ) + ( max / 2 ) ) / max;
-
-
-    if r == max
-      hue = del_B - del_G
-
-    elsif g == max 
-      hue = (1.0 / 3.0) + del_R - del_B
-
-    elsif b == max 
-      hue = (2.0 / 3.0) + del_G - del_R
-    end
-  end
-
-  if hue < 0.0 
-    hue += 1.0
-  end
-  if hue > 0.0 
-    hue -= 1.0
-  end
-
-  [hue, saturation, value]
-end
+require 'set'
 
 def hsv2rgb(h, s, v) 
 
-  i = (h * 6).floor
-  f = h * 6.0 - i
-  p = v * (1 - s)
-  q = v * (1 - s * f)
-  t = v * (1 - s * (1 - f))
+  i = h.floor
+  f = h - i
+  p = (v * (6 - s)) / 6
+  q = (v * (6 - s * f)) / 6
+  t = (v * (6 - s * (1 - f))) / 6
 
   case i
     when 0
@@ -115,7 +72,7 @@ class Color
   end
 
   def decompose
-    ((@r * 216).ceil + (@g * 36).ceil + @b * 6).ceil + 16
+    ((@r * 36).ceil + (@g * 6).ceil + @b).ceil + 16
   end
 
   def to_i
@@ -135,16 +92,16 @@ def bg color; "\e[48;5;#{color}m"; end
 
 def midpoint set
   set.map { | x | 
-    x += (1 / 6.0) / 8.0
+    x += 0.05
   }
 end
  
 def base6 base
-  one = (base % 6).to_f / 6
-  base /= 6
-  two = (base % 6).to_f / 6
-  base /= 6
-  three = (base % 6).to_f / 6
+  one = (base % 6).to_i 
+  base = (base / 6).floor
+  two = (base % 6).to_i
+  base = (base / 6).floor
+  three = (base % 6).to_i 
   [three, two, one]
 end
 
@@ -156,14 +113,16 @@ def docolor color
 #  print "\e[0m\e[48;5;0m\e[38;5;#{color}m #{"%03d" % color}\n"
 end
 
-216.times do |i|
+set = Set.new
+(6 * 6 * 6).times do |i|
   if i % 6 == 0
     print "\n"
   end
   h, s, v = base6 i
   r, g, b = hsv2rgb(h, s, v)
   color = Color.new([r, g, b])
+  set << color.to_i
   docolor color
-  puts "#{(h * 100).to_i} #{(s * 100).to_i} #{(v * 100).to_i} "
-  puts "   #{(r * 100).to_i} #{(g * 100).to_i} #{(b * 100).to_i} #{color}"
+  #puts "#{h} #{s} #{v} | #{r} #{g} #{b}"# #{color}"
 end
+puts set.length
